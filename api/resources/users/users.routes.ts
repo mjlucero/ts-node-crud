@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { validateUser } from './users.validate';
 
 const usersRoutes = Router();
 
@@ -19,12 +20,9 @@ usersRoutes.get('/:id', (req: Request, res: Response) => {
 	});
 });
 
-usersRoutes.post('/', (req: Request, res: Response) => {
-	const { body } = req;
-
+usersRoutes.post('/', validateUser, (req: Request, res: Response) => {
 	return res.json({
-		path: 'POST users/',
-		body
+		path: 'POST users/'
 	});
 });
 
