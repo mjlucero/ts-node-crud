@@ -1,38 +1,12 @@
 import express, { Application } from 'express';
-import path from 'path';
 import cors from 'cors';
-import winston from 'winston';
+import passport from 'passport';
 
-import usersRoutes from '../api/resources/users/users.routes';
+import Logger from '../logger';
 import db from '../db/connection';
-
-const includeDate = winston.format(info => {
-	return {
-		...info,
-		message: `${new Date().toISOString()} ${info.message}`
-	};
-});
-
-const logger = winston.createLogger({
-	transports: [
-		new winston.transports.Console({
-			level: 'debug',
-			handleExceptions: true,
-			format: winston.format.combine(
-				winston.format.colorize(),
-				winston.format.simple()
-			)
-		}),
-		new winston.transports.File({
-			level: 'info',
-			handleExceptions: true,
-			format: winston.format.combine(includeDate(), winston.format.simple()),
-			maxsize: 5120000, //5mb
-			maxFiles: 5,
-			filename: path.join(__dirname, '../logs/app.log')
-		})
-	]
-});
+import morganMiddleware from '../middlewares/morgan';
+import authJWT from '../middlewares/auth';
+import usersRoutes from '../api/resources/users/users.routes';
 
 export class Server {
 	private app: Application;
@@ -42,23 +16,28 @@ export class Server {
 	};
 
 	constructor() {
+		// Set passport strategy
+		passport.use(authJWT);
+
 		this.app = express();
+
 		this.port = process.env.PORT || '8000';
 
-		//db
+		// Database
 		this.dbConnection();
 
-		//Middlewares
+		// Middlewares
 		this.setupMiddlewares();
 
-		//Register routes
+		// Register routes
 		this.registryRoutes();
 	}
 
 	async dbConnection(): Promise<void> {
 		try {
 			await db.authenticate();
-			logger.info('Database online');
+			db.sync();
+			Logger.info('Database online');
 		} catch (error) {
 			throw new Error(error);
 		}
@@ -71,13 +50,19 @@ export class Server {
 		//BodyParser
 		this.app.use(express.json());
 
+		// Passport initialize
+		this.app.use(passport.initialize());
+
+		//Morgan
+		this.app.use(morganMiddleware);
+
 		//Public resources
 		this.app.use(express.static('public'));
 	}
 
 	listen(): void {
 		this.app.listen(this.port, () => {
-			console.log('Server running on port ' + this.port);
+			Logger.info('Server running on port ' + this.port);
 		});
 	}
 
