@@ -1,4 +1,6 @@
 import { Request } from 'express';
-import { IUser } from '../interfaces/user';
+import {
+	UserAttributes,
+} from '../api/resources/users/users.model';
 
-export type UserRequest = Request<unknown, unknown, IUser>;
+export type UserRequest = Request<unknown, unknown, UserAttributes>;

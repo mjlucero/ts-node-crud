@@ -44,6 +44,9 @@ export class Server {
 	}
 
 	setupMiddlewares(): void {
+		//Morgan
+		this.app.use(morganMiddleware);
+
 		//CORS
 		this.app.use(cors());
 
@@ -52,9 +55,6 @@ export class Server {
 
 		// Passport initialize
 		this.app.use(passport.initialize());
-
-		//Morgan
-		this.app.use(morganMiddleware);
 
 		//Public resources
 		this.app.use(express.static('public'));

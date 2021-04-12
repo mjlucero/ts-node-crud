@@ -1,4 +1,3 @@
-import { Model } from 'sequelize/types';
 import { PaginationResponse, PagingDataResponse } from '../types/pagination';
 
 export const getPagination = (

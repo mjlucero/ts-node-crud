@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
-import { IUser } from '../../../interfaces/user';
+import { UserCreationAttributes } from './users.model';
 
-const blueprintUser = Joi.object<IUser>().keys({
+const blueprintUser = Joi.object<UserCreationAttributes>().keys({
 	name: Joi.string().max(255).required(),
 	username: Joi.string().max(255).required(),
 	password: Joi.string().min(6).max(30).required(),
